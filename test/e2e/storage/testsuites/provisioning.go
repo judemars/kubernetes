@@ -443,7 +443,7 @@ func (p *provisioningTestSuite) DefineTests(driver storageframework.TestDriver, 
 		l.testCase.TestDynamicProvisioning(ctx)
 	})
 
-	ginkgo.It("ROX should provision storage with pvc data source for readonly filesystem", func(ctx context.Context) {
+	ginkgo.It("should provision storage with pvc data source for readonly filesystem", func(ctx context.Context) {
 		if !dInfo.Capabilities[storageframework.CapPVCDataSource] {
 			e2eskipper.Skipf("Driver %q does not support cloning - skipping", dInfo.Name)
 		}
