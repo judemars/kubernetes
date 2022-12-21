@@ -193,12 +193,12 @@ name | architectures
 
 ## Changelog since v1.25.0
 
-## Urgent Upgrade Notes 
+## Urgent Upgrade Notes
 
 ### (No, really, you MUST read this before you upgrade)
 
 - Deprecated beta APIs scheduled for removal in `v1.26` are no longer served. See https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-26 for more information. ([#111973](https://github.com/kubernetes/kubernetes/pull/111973), [@liggitt](https://github.com/liggitt))
- 
+
 ## Changes by Kind
 
 ### Deprecation
@@ -268,7 +268,7 @@ name | architectures
   label selectors.'
    ([#113699](https://github.com/kubernetes/kubernetes/pull/113699), [@liggitt](https://github.com/liggitt))
 - Add `percentageOfNodesToScore` as a scheduler profile level parameter to API version `v1`. When a profile `percentageOfNodesToScore` is set, it will override global `percentageOfNodesToScore`. ([#112521](https://github.com/kubernetes/kubernetes/pull/112521), [@yuanchen8911](https://github.com/yuanchen8911))
-- Add auth API to get self subject attributes (new selfsubjectreviews API is added). 
+- Add auth API to get self subject attributes (new selfsubjectreviews API is added).
   The corresponding command for kubctl is provided - `kubectl auth whoami`. ([#111333](https://github.com/kubernetes/kubernetes/pull/111333), [@nabokihms](https://github.com/nabokihms)) [SIG API Machinery, Auth, CLI and Testing]
 - Added `kubernetes_feature_enabled` metric series to track whether each active feature gate is enabled. ([#112690](https://github.com/kubernetes/kubernetes/pull/112690), [@logicalhan](https://github.com/logicalhan))
 - Added a `--topology-manager-policy-options` flag to the kubelet to support fine tuning the topology manager policies. The first policy option, `prefer-closest-numa-nodes`, allows these policies to favor sets of NUMA nodes with shorter distance between nodes when making admission decisions. ([#112914](https://github.com/kubernetes/kubernetes/pull/112914), [@PiotrProkop](https://github.com/PiotrProkop))
@@ -422,7 +422,7 @@ name | architectures
 - The ExpandedDNSConfig feature has graduated to beta and is enabled by default. Note that this feature requires container runtime support. ([#112824](https://github.com/kubernetes/kubernetes/pull/112824), [@gjkim42](https://github.com/gjkim42)) [SIG Network and Testing]
 - The `LegacyServiceAccountTokenNoAutoGeneration` feature gate was promoted to GA. ([#112838](https://github.com/kubernetes/kubernetes/pull/112838), [@zshihang](https://github.com/zshihang))
 - The `ProxyTerminatingEndpoints` feature is now Beta and enabled by default. When enabled, kube-proxy will attempt to route traffic to terminating pods when the traffic policy is `Local` and there are only terminating pods remaining on a node. ([#113363](https://github.com/kubernetes/kubernetes/pull/113363), [@andrewsykim](https://github.com/andrewsykim))
-- The `goroutines` metric is newly added in the scheduler. 
+- The `goroutines` metric is newly added in the scheduler.
   It replaces `scheduler_goroutines` metric and it counts the number of goroutine in more places than `scheduler_goroutine` does. ([#112003](https://github.com/kubernetes/kubernetes/pull/112003), [@sanposhiho](https://github.com/sanposhiho)) [SIG Instrumentation and Scheduling]
 - Updated cAdvisor to v0.46.0. ([#113769](https://github.com/kubernetes/kubernetes/pull/113769), [@bobbypage](https://github.com/bobbypage))
 - Updated the Lease identity naming format for the `APIServerIdentity` feature to use a persistent name. ([#113307](https://github.com/kubernetes/kubernetes/pull/113307), [@andrewsykim](https://github.com/andrewsykim))
@@ -454,7 +454,6 @@ name | architectures
 - Correct the calculating error in `podTopologySpread` plugin to avoid unexpected scheduling results. ([#112507](https://github.com/kubernetes/kubernetes/pull/112507), [@kerthcet](https://github.com/kerthcet))
 - Etcd: Updated to v3.5.5. ([#112489](https://github.com/kubernetes/kubernetes/pull/112489), [@dims](https://github.com/dims))
 - Fixed Admission controllers that caused unnecessary significant load on `apiserver'. ([#112696](https://github.com/kubernetes/kubernetes/pull/112696), [@aimuz](https://github.com/aimuz))
-- Fixed `DaemonSet` to update the status even if it fails to create a pod. ([#112127](https://github.com/kubernetes/kubernetes/pull/112127), [@gjkim42](https://github.com/gjkim42))
 - Fixed a bug where a change in the `appProtocol` for a Service did not trigger a load balancer update. ([#112785](https://github.com/kubernetes/kubernetes/pull/112785), [@MartinForReal](https://github.com/MartinForReal)) [SIG Cloud Provider and Network]
 - Fixed a bug where the kubelet choose the wrong container by its name when running `kubectl exec`. ([#113041](https://github.com/kubernetes/kubernetes/pull/113041), [@saschagrunert](https://github.com/saschagrunert))
 - Fixed an ephemeral port exhaustion bug caused by improper connection management that occurred when a large number of objects were handled by `kubectl` while exec auth was in use. ([#112017](https://github.com/kubernetes/kubernetes/pull/112017), [@enj](https://github.com/enj))
@@ -511,7 +510,7 @@ name | architectures
 - The errors in `k8s.io/apimachinery/pkg/api/meta` now support for the `stdlibs` `errors.Is` matching, including when wrapped. ([#111808](https://github.com/kubernetes/kubernetes/pull/111808), [@alvaroaleman](https://github.com/alvaroaleman))
 - The metrics `etcd_request_duration_seconds` and `etcd_bookmark_counts` now differentiate by group resource instead of object type, allowing unique entries per `CustomResourceDefinition`, instead of grouping them all under `*unstructured.Unstructured`. ([#112042](https://github.com/kubernetes/kubernetes/pull/112042), [@ncdc](https://github.com/ncdc))
 - The pod admission error message was improved for usability. ([#112644](https://github.com/kubernetes/kubernetes/pull/112644), [@vitorfhc](https://github.com/vitorfhc)) [SIG Node]
-- The time duration of a failed or unschedulable scheduling attempt will be longer, it 
+- The time duration of a failed or unschedulable scheduling attempt will be longer, it
   now includes the time duration of the unreserve operation. ([#113113](https://github.com/kubernetes/kubernetes/pull/113113), [@kerthcet](https://github.com/kerthcet))
 - Updated `kube-proxy` to restart in case it detects that the Node assigned `pod.Spec.PodCIDRs` have changed. ([#111344](https://github.com/kubernetes/kubernetes/pull/111344), [@aojea](https://github.com/aojea))
 - Updated creation of `LoadBalancer` services, for there to be fewer AWS security group rules in most cases. ([#112267](https://github.com/kubernetes/kubernetes/pull/112267), [@sjenning](https://github.com/sjenning))
@@ -539,7 +538,7 @@ name | architectures
 - Dropped support for the Container Runtime Interface (CRI) version `v1alpha2`, which means that container runtimes just have to implement `v1`. ([#110618](https://github.com/kubernetes/kubernetes/pull/110618), [@saschagrunert](https://github.com/saschagrunert))
 - E2e: tests can now register callbacks with `ginkgo.BeforeEach`, `ginkgo.AfterEach` or `ginkgo.DeferCleanup` directly after creating a framework instance and are guaranteed that their code is called after the framework is initialized and before it gets cleaned up. `ginkgo.DeferCleanup` replaces `f.AddAfterEach` and `AddCleanupAction` which got removed to simplify the framework. ([#111998](https://github.com/kubernetes/kubernetes/pull/111998), [@pohly](https://github.com/pohly))
 - Introduce `ComponentSLIs` alpha feature-gate for component SLIs metrics endpoint. ([#112884](https://github.com/kubernetes/kubernetes/pull/112884), [@logicalhan](https://github.com/logicalhan)) [SIG API Machinery]
-- Kube scheduler Component Config release version v1beta3 is deprecated in v1.26 and will be removed in v1.29, 
+- Kube scheduler Component Config release version v1beta3 is deprecated in v1.26 and will be removed in v1.29,
   also v1beta2 will be removed in v1.28. ([#112257](https://github.com/kubernetes/kubernetes/pull/112257), [@kerthcet](https://github.com/kerthcet)) [SIG Scheduling]
 - Kube-scheduler: the `DefaultPodTopologySpread`, `NonPreemptingPriority`, `PodAffinityNamespaceSelector` and `PreferNominatedNode` feature gates that graduated to GA in v1.24 and were unconditionally enabled have been removed in v1.26. ([#112567](https://github.com/kubernetes/kubernetes/pull/112567), [@SataQiu](https://github.com/SataQiu))
 - Kubeadm: removed the `UnversionedKubeletConfigMap` feature gate. The feature has been GA and locked to enabled since `v1.25`. ([#113448](https://github.com/kubernetes/kubernetes/pull/113448), [@pacoxu](https://github.com/pacoxu))
@@ -834,11 +833,11 @@ name | architectures
 - When the feature gates `PodDisruptionConditions` and `JobPodFailurePolicy` are both enabled,
   the Job controller now does not consider a terminating Pod (a pod that has a `.metadata.deletionTimestamp`)
   as a failure until that Pod is terminal (its `.status.phase` is `Failed` or `Succeeded`).
-  
+
   However, the Job controller creates a replacement Pod as soon as the termination becomes apparent.
   Once the pod terminates, the Job controller evaluates `.backoffLimit` and `.podFailurePolicy` for the
   relevant Job, taking this now-terminated Pod into consideration.
-  
+
   This behavior is limited to Jobs with `.spec.podFailurePolicy` set, and only when those two feature
   gates are both enabled.
   If either of these requirements is not satisfied, the Job controller counts a terminating Pod as an immediate
@@ -1067,7 +1066,7 @@ name | architectures
   - `apiserver_flowcontrol_target_seats`: Seat allocation targets
   - `apiserver_flowcontrol_seat_fair_frac`: Fair fraction of server's concurrency to allocate to each priority level that can use it
   - `apiserver_flowcontrol_current_limit_seats`: current derived number of execution seats available to each priority level
-  
+
   The possibility of borrowing means that the old metric apiserver_flowcontrol_request_concurrency_limit can no longer mean both the configured concurrency limit and the enforced concurrency limit.  Henceforth it means the configured concurrency limit. ([#113485](https://github.com/kubernetes/kubernetes/pull/113485), [@MikeSpreitzer](https://github.com/MikeSpreitzer)) [SIG API Machinery and Testing]
 - The EndpointSliceTerminatingCondition feature gate has graduated to GA. The gate is now locked and will be removed in v1.28. ([#113351](https://github.com/kubernetes/kubernetes/pull/113351), [@andrewsykim](https://github.com/andrewsykim)) [SIG API Machinery, Apps, Network and Testing]
 - Yes, aggregated discovery will be alpha and can be toggled with the AggregatedDiscoveryEndpoint feature flag ([#113171](https://github.com/kubernetes/kubernetes/pull/113171), [@Jefftree](https://github.com/Jefftree)) [SIG API Machinery, Apps, Architecture, Auth, Autoscaling, CLI, Cloud Provider, Cluster Lifecycle, Network, Node, Release, Scalability, Scheduling, Storage and Testing]
@@ -1115,7 +1114,6 @@ name | architectures
 - Fix cost estimation of token creation request for service account in Priority and Fairness. ([#113206](https://github.com/kubernetes/kubernetes/pull/113206), [@marseel](https://github.com/marseel)) [SIG API Machinery]
 - Fix that disruption controller changes the status of a stale disruption condition after 2 min when the PodDisruptionConditions feature gate is enabled ([#113580](https://github.com/kubernetes/kubernetes/pull/113580), [@mimowo](https://github.com/mimowo)) [SIG Auth]
 - Fix the PodAndContainerStatsFromCRI feature, instead of supplementing with stats from cAdvisor. ([#113291](https://github.com/kubernetes/kubernetes/pull/113291), [@mengjiao-liu](https://github.com/mengjiao-liu)) [SIG Instrumentation and Node]
-- Fixed DaemonSet to update the status even if it fails to create a pod. ([#112127](https://github.com/kubernetes/kubernetes/pull/112127), [@gjkim42](https://github.com/gjkim42)) [SIG Apps and Testing]
 - For `kubectl`, `--server-side` now migrates ownership of all fields used by client-side-apply to the specified `--fieldmanager`. This prevents fields previously specified using kubectl from being able to live outside of server-side-apply's management and become undeleteable. ([#112905](https://github.com/kubernetes/kubernetes/pull/112905), [@alexzielenski](https://github.com/alexzielenski)) [SIG API Machinery, CLI and Testing]
 - Kubectl apply: warning that kubectl will ignore no-namespaced resource `pv & namespace` in a future release if the namespace is specified and allowlist is not specified ([#110907](https://github.com/kubernetes/kubernetes/pull/110907), [@pacoxu](https://github.com/pacoxu)) [SIG CLI]
 - Kubelet: Fixes a startup crash in devicemanager ([#113021](https://github.com/kubernetes/kubernetes/pull/113021), [@rphillips](https://github.com/rphillips)) [SIG Node]
@@ -1235,17 +1233,17 @@ name | architectures
 ### API Change
 
 - **Additional documentation e.g., KEPs (Kubernetes Enhancement Proposals), usage docs, etc.**:
-  
+
   <!--
   This section can be blank if this pull request does not require a release note.
-  
+
   When adding links which point to resources within git repositories, like
   KEPs or supporting documentation, please reference a specific commit and avoid
   linking directly to the master branch. This ensures that links reference a
   specific point in time, rather than a document that may change over time.
-  
+
   See here for guidance on getting permanent links to files: https://help.github.com/en/articles/getting-permanent-links-to-files
-  
+
   Please use the following format for linking documentation:
   - [KEP]: <link>
   - [Usage]: <link>
@@ -1659,7 +1657,7 @@ name | architectures
 ### (No, really, you MUST read this before you upgrade)
 
  - Deprecated beta APIs scheduled for removal in 1.26 are no longer served. See https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-26 for more information. ([#111973](https://github.com/kubernetes/kubernetes/pull/111973), [@liggitt](https://github.com/liggitt)) [SIG API Machinery]
- 
+
 ## Changes by Kind
 
 ### Deprecation
@@ -1668,7 +1666,7 @@ name | architectures
 
 ### API Change
 
-- Add auth API to get self subject attributes (new selfsubjectreviews API is added). 
+- Add auth API to get self subject attributes (new selfsubjectreviews API is added).
   The corresponding command for kubctl is provided - `kubectl auth whoami`. ([#111333](https://github.com/kubernetes/kubernetes/pull/111333), [@nabokihms](https://github.com/nabokihms)) [SIG API Machinery, Auth, CLI and Testing]
 - Clarified the CFS quota as 100ms in the code comments and set the minimum cpuCFSQuotaPeriod to 1ms to match Linux kernel expectations. ([#112123](https://github.com/kubernetes/kubernetes/pull/112123), [@paskal](https://github.com/paskal)) [SIG API Machinery and Node]
 - Component-base: make the validation logic about LeaderElectionConfiguration consistent between component-base and client-go ([#111758](https://github.com/kubernetes/kubernetes/pull/111758), [@SataQiu](https://github.com/SataQiu)) [SIG API Machinery and Scheduling]
@@ -1719,7 +1717,7 @@ name | architectures
 - Kubeadm: try to load CA cert from external CertificateAuthority file when CertificateAuthorityData is empty for existing kubeconfig ([#111783](https://github.com/kubernetes/kubernetes/pull/111783), [@SataQiu](https://github.com/SataQiu)) [SIG Cluster Lifecycle]
 - Kubernetes is now built with Go 1.19.1 ([#112287](https://github.com/kubernetes/kubernetes/pull/112287), [@palnabarun](https://github.com/palnabarun)) [SIG Release and Testing]
 - Scheduler now retries updating a pod's status on ServiceUnavailable and InternalError errors, in addition to net ConnectionRefused error. ([#111809](https://github.com/kubernetes/kubernetes/pull/111809), [@Huang-Wei](https://github.com/Huang-Wei)) [SIG Scheduling]
-- The `goroutines` metric is newly added in the scheduler. 
+- The `goroutines` metric is newly added in the scheduler.
   It replaces `scheduler_goroutines` metric and it counts the number of goroutine in more places than `scheduler_goroutine` does. ([#112003](https://github.com/kubernetes/kubernetes/pull/112003), [@sanposhiho](https://github.com/sanposhiho)) [SIG Instrumentation and Scheduling]
 
 ### Documentation
@@ -1755,7 +1753,7 @@ name | architectures
 - Kubeadm: when a subcommand is needed but not provided for a kubeadm command, print a help screen instead of showing a short message. ([#111277](https://github.com/kubernetes/kubernetes/pull/111277), [@chymy](https://github.com/chymy)) [SIG Cluster Lifecycle]
 - Log messages and metrics for the watch cache are now keyed by `<resource>.<group>` instead of `go` struct type. This means e.g. that `*v1.Pod` becomes `pods`. Additionally, resources that come from CustomResourceDefinitions are now displayed as the correct resource and group, instead of `*unstructured.Unstructured`. ([#111807](https://github.com/kubernetes/kubernetes/pull/111807), [@ncdc](https://github.com/ncdc)) [SIG API Machinery and Instrumentation]
 - Move LocalStorageCapacityIsolationFSQuotaMonitoring back to Alpha. ([#112076](https://github.com/kubernetes/kubernetes/pull/112076), [@rphillips](https://github.com/rphillips)) [SIG Node and Testing]
-- Pod failed in scheduling due to expected error will be updated with the reason of "SchedulerError" 
+- Pod failed in scheduling due to expected error will be updated with the reason of "SchedulerError"
   rather than "Unschedulable" ([#111999](https://github.com/kubernetes/kubernetes/pull/111999), [@kerthcet](https://github.com/kerthcet)) [SIG Scheduling and Testing]
 - Services of type LoadBalancer create fewer AWS security group rules in most cases ([#112267](https://github.com/kubernetes/kubernetes/pull/112267), [@sjenning](https://github.com/sjenning)) [SIG Cloud Provider]
 - The errors in k8s.io/apimachinery/pkg/api/meta gained support for the stdlibs errors.Is matching, including when wrapped ([#111808](https://github.com/kubernetes/kubernetes/pull/111808), [@alvaroaleman](https://github.com/alvaroaleman)) [SIG API Machinery]
@@ -1766,7 +1764,7 @@ name | architectures
 
 - E2e: tests can now register callbacks with ginkgo.BeforeEach/AfterEach/DeferCleanup directly after creating a framework instance and are guaranteed that their code is called after the framework is initialized and before it gets cleaned up. ginkgo.DeferCleanup replaces f.AddAfterEach and AddCleanupAction which got removed to simplify the framework. ([#111998](https://github.com/kubernetes/kubernetes/pull/111998), [@pohly](https://github.com/pohly)) [SIG Storage and Testing]
 - GlusterFS in-tree storage driver which was deprecated at kubernetes 1.25 release has been removed entirely in 1.26. ([#112015](https://github.com/kubernetes/kubernetes/pull/112015), [@humblec](https://github.com/humblec)) [SIG API Machinery, Cloud Provider, Instrumentation, Node, Scalability, Storage and Testing]
-- Kube scheduler Component Config release version v1beta3 is deprecated in v1.26 and will be removed in v1.29, 
+- Kube scheduler Component Config release version v1beta3 is deprecated in v1.26 and will be removed in v1.29,
   also v1beta2 will be removed in v1.28. ([#112257](https://github.com/kubernetes/kubernetes/pull/112257), [@kerthcet](https://github.com/kerthcet)) [SIG Scheduling]
 - Kube-scheduler: the DefaultPodTopologySpread, NonPreemptingPriority,  PodAffinityNamespaceSelector, PreferNominatedNode feature gates that graduated to GA in 1.24 and were unconditionally enabled have been removed in v1.26 ([#112567](https://github.com/kubernetes/kubernetes/pull/112567), [@SataQiu](https://github.com/SataQiu)) [SIG Scheduling]
 - Kubeadm: remove the toleration for the "node-role.kubernetes.io/master" taint from the CoreDNS deployment of kubeadm. With the 1.25 release of kubeadm the taint "node-role.kubernetes.io/master" is no longer applied to control plane nodes and the toleration for it can be removed with the release of 1.26. You can also perform the same toleration removal from your own addon manifests. ([#112008](https://github.com/kubernetes/kubernetes/pull/112008), [@pacoxu](https://github.com/pacoxu)) [SIG Cluster Lifecycle]

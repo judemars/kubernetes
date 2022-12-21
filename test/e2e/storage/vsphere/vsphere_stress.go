@@ -153,7 +153,11 @@ func PerformVolumeLifeCycleInParallel(ctx context.Context, f *framework.Framewor
 
 		ginkgo.By(fmt.Sprintf("%v Creating Pod using the claim: %v", logPrefix, pvclaim.Name))
 		// Create pod to attach Volume to Node
+<<<<<<< HEAD
 		pod, err := e2epod.CreatePod(ctx, client, namespace, nil, pvclaims, false, "", false)
+=======
+		pod, err := e2epod.CreatePod(ctx, client, namespace, nil, pvclaims, false, "")
+>>>>>>> upstream/master
 		framework.ExpectNoError(err)
 
 		ginkgo.By(fmt.Sprintf("%v Waiting for the Pod: %v to be in the running state", logPrefix, pod.Name))

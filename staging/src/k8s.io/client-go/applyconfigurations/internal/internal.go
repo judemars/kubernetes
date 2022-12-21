@@ -6553,6 +6553,11 @@ var schemaYAML = typed.YAMLObject(`types:
           elementType:
             namedType: io.k8s.api.core.v1.ResourceClaim
           elementRelationship: associative
+<<<<<<< HEAD
+=======
+          keys:
+          - name
+>>>>>>> upstream/master
     - name: limits
       type:
         map:

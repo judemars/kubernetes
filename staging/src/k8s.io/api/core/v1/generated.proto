@@ -4517,7 +4517,12 @@ message ResourceRequirements {
   //
   // This field is immutable.
   //
+<<<<<<< HEAD
   // +listType=set
+=======
+  // +listType=map
+  // +listMapKey=name
+>>>>>>> upstream/master
   // +featureGate=DynamicResourceAllocation
   // +optional
   repeated ResourceClaim claims = 3;

@@ -2321,7 +2321,12 @@ type ResourceRequirements struct {
 	//
 	// This field is immutable.
 	//
+<<<<<<< HEAD
 	// +listType=set
+=======
+	// +listType=map
+	// +listMapKey=name
+>>>>>>> upstream/master
 	// +featureGate=DynamicResourceAllocation
 	// +optional
 	Claims []ResourceClaim `json:"claims,omitempty" protobuf:"bytes,3,opt,name=claims"`
