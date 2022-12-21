@@ -24,7 +24,6 @@ import (
 	"sync"
 	"time"
 
-	"k8s.io/klog/v2"
 	e2ekubectl "k8s.io/kubernetes/test/e2e/framework/kubectl"
 
 	"github.com/onsi/ginkgo/v2"
@@ -796,7 +795,6 @@ func SetupStorageClass(
 // TestDynamicProvisioning tests dynamic provisioning with specified StorageClassTest
 // it's assumed that the StorageClass `t.Class` is already provisioned,
 // see #ProvisionStorageClass
-// Returns the pv and pod that were configured, if applicable
 func (t StorageClassTest) TestDynamicProvisioning(ctx context.Context) *v1.PersistentVolume {
 	var err error
 	client := t.Client
@@ -868,7 +866,6 @@ func (t StorageClassTest) TestDynamicProvisioning(ctx context.Context) *v1.Persi
 // getBoundPV returns a PV details.
 func getBoundPV(ctx context.Context, client clientset.Interface, pvc *v1.PersistentVolumeClaim, claimProvisionTimeout time.Duration) (*v1.PersistentVolume, error) {
 	// Get new copy of the claim
-	klog.Errorf("pvc = %v+", pvc)
 	claim, err := client.CoreV1().PersistentVolumeClaims(pvc.Namespace).Get(ctx, pvc.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
@@ -878,7 +875,6 @@ func getBoundPV(ctx context.Context, client clientset.Interface, pvc *v1.Persist
 	err = e2epv.WaitForPersistentVolumeClaimPhase(ctx, v1.ClaimBound, client, claim.Namespace, claim.Name, framework.Poll, claimProvisionTimeout)
 	framework.ExpectNoError(err)
 
-	klog.Errorf("claim = %v+", claim)
 	// Get the bound PV
 	pv, err := client.CoreV1().PersistentVolumes().Get(ctx, claim.Spec.VolumeName, metav1.GetOptions{})
 	return pv, err
