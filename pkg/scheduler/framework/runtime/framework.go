@@ -75,6 +75,7 @@ type frameworkImpl struct {
 	snapshotSharedLister framework.SharedLister
 	waitingPods          *waitingPodsMap
 	scorePluginWeight    map[string]int
+	preEnqueuePlugins    []framework.PreEnqueuePlugin
 	queueSortPlugins     []framework.QueueSortPlugin
 	preFilterPlugins     []framework.PreFilterPlugin
 	filterPlugins        []framework.FilterPlugin
@@ -125,6 +126,7 @@ func (f *frameworkImpl) getExtensionPoints(plugins *config.Plugins) []extensionP
 		{&plugins.Bind, &f.bindPlugins},
 		{&plugins.PostBind, &f.postBindPlugins},
 		{&plugins.Permit, &f.permitPlugins},
+		{&plugins.PreEnqueue, &f.preEnqueuePlugins},
 		{&plugins.QueueSort, &f.queueSortPlugins},
 	}
 }
@@ -574,6 +576,11 @@ func updatePluginList(pluginList interface{}, pluginSet config.PluginSet, plugin
 	return nil
 }
 
+// EnqueuePlugins returns the registered enqueue plugins.
+func (f *frameworkImpl) PreEnqueuePlugins() []framework.PreEnqueuePlugin {
+	return f.preEnqueuePlugins
+}
+
 // QueueSortFunc returns the function to sort pods in scheduling queue
 func (f *frameworkImpl) QueueSortFunc() framework.LessFunc {
 	if f == nil {
@@ -723,11 +730,10 @@ func (f *frameworkImpl) RunFilterPlugins(
 			if !pluginStatus.IsUnschedulable() {
 				// Filter plugins are not supposed to return any status other than
 				// Success or Unschedulable.
-				errStatus := framework.AsStatus(fmt.Errorf("running %q filter plugin: %w", pl.Name(), pluginStatus.AsError())).WithFailedPlugin(pl.Name())
-				return map[string]*framework.Status{pl.Name(): errStatus}
+				pluginStatus = framework.AsStatus(fmt.Errorf("running %q filter plugin: %w", pl.Name(), pluginStatus.AsError()))
 			}
 			pluginStatus.SetFailedPlugin(pl.Name())
-			statuses[pl.Name()] = pluginStatus
+			return map[string]*framework.Status{pl.Name(): pluginStatus}
 		}
 	}
 
@@ -1226,7 +1232,6 @@ func (f *frameworkImpl) WaitOnPermit(ctx context.Context, pod *v1.Pod) *framewor
 	if !s.IsSuccess() {
 		if s.IsUnschedulable() {
 			klog.V(4).InfoS("Pod rejected while waiting on permit", "pod", klog.KObj(pod), "status", s.Message())
-			s.SetFailedPlugin(s.FailedPlugin())
 			return s
 		}
 		err := s.AsError()

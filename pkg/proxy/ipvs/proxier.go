@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"os"
 	"reflect"
@@ -42,10 +41,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/version"
 	"k8s.io/apimachinery/pkg/util/wait"
-	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/client-go/tools/events"
 	utilsysctl "k8s.io/component-helpers/node/util/sysctl"
-	"k8s.io/kubernetes/pkg/features"
 	"k8s.io/kubernetes/pkg/proxy"
 	"k8s.io/kubernetes/pkg/proxy/healthcheck"
 	"k8s.io/kubernetes/pkg/proxy/metaproxier"
@@ -228,7 +225,7 @@ type Proxier struct {
 	serviceChanges   *proxy.ServiceChangeTracker
 
 	mu           sync.Mutex // protects the following fields
-	serviceMap   proxy.ServiceMap
+	svcPortMap   proxy.ServicePortMap
 	endpointsMap proxy.EndpointsMap
 	nodeLabels   map[string]string
 	// initialSync is a bool indicating if the proxier is syncing for the first time.
@@ -479,7 +476,7 @@ func NewProxier(ipt utiliptables.Interface,
 
 	proxier := &Proxier{
 		ipFamily:              ipFamily,
-		serviceMap:            make(proxy.ServiceMap),
+		svcPortMap:            make(proxy.ServicePortMap),
 		serviceChanges:        proxy.NewServiceChangeTracker(newServiceInfo, ipFamily, recorder, nil),
 		endpointsMap:          make(proxy.EndpointsMap),
 		endpointsChanges:      proxy.NewEndpointChangeTracker(hostname, nil, ipFamily, recorder, nil),
@@ -590,14 +587,14 @@ func filterCIDRs(wantIPv6 bool, cidrs []string) []string {
 
 // internal struct for string service information
 type servicePortInfo struct {
-	*proxy.BaseServiceInfo
+	*proxy.BaseServicePortInfo
 	// The following fields are computed and stored for performance reasons.
 	nameString string
 }
 
 // returns a new proxy.ServicePort which abstracts a serviceInfo
-func newServiceInfo(port *v1.ServicePort, service *v1.Service, baseInfo *proxy.BaseServiceInfo) proxy.ServicePort {
-	svcPort := &servicePortInfo{BaseServiceInfo: baseInfo}
+func newServiceInfo(port *v1.ServicePort, service *v1.Service, bsvcPortInfo *proxy.BaseServicePortInfo) proxy.ServicePort {
+	svcPort := &servicePortInfo{BaseServicePortInfo: bsvcPortInfo}
 
 	// Store the following for performance reasons.
 	svcName := types.NamespacedName{Namespace: service.Namespace, Name: service.Name}
@@ -645,7 +642,7 @@ func (handle *LinuxKernelHandler) GetModules() ([]string, error) {
 	if err == os.ErrNotExist {
 		klog.ErrorS(err, "Failed to read file /proc/modules, assuming this is a kernel without loadable modules support enabled")
 		kernelConfigFile := fmt.Sprintf("/boot/config-%s", kernelVersionStr)
-		kConfig, err := ioutil.ReadFile(kernelConfigFile)
+		kConfig, err := os.ReadFile(kernelConfigFile)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read Kernel Config file %s with error %w", kernelConfigFile, err)
 		}
@@ -667,7 +664,7 @@ func (handle *LinuxKernelHandler) GetModules() ([]string, error) {
 	}
 
 	builtinModsFilePath := fmt.Sprintf("/lib/modules/%s/modules.builtin", kernelVersionStr)
-	b, err := ioutil.ReadFile(builtinModsFilePath)
+	b, err := os.ReadFile(builtinModsFilePath)
 	if err != nil {
 		klog.ErrorS(err, "Failed to read builtin modules file, you can ignore this message when kube-proxy is running inside container without mounting /lib/modules", "filePath", builtinModsFilePath)
 	}
@@ -695,7 +692,7 @@ func (handle *LinuxKernelHandler) GetModules() ([]string, error) {
 // getFirstColumn reads all the content from r into memory and return a
 // slice which consists of the first word from each line.
 func getFirstColumn(r io.Reader) ([]string, error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
@@ -714,7 +711,7 @@ func getFirstColumn(r io.Reader) ([]string, error) {
 // GetKernelVersion returns currently running kernel version.
 func (handle *LinuxKernelHandler) GetKernelVersion() (string, error) {
 	kernelVersionFile := "/proc/sys/kernel/osrelease"
-	fileContent, err := ioutil.ReadFile(kernelVersionFile)
+	fileContent, err := os.ReadFile(kernelVersionFile)
 	if err != nil {
 		return "", fmt.Errorf("error reading osrelease file %q: %v", kernelVersionFile, err)
 	}
@@ -1042,13 +1039,13 @@ func (proxier *Proxier) syncProxyRules() {
 	// We assume that if this was called, we really want to sync them,
 	// even if nothing changed in the meantime. In other words, callers are
 	// responsible for detecting no-op changes and not calling this function.
-	serviceUpdateResult := proxier.serviceMap.Update(proxier.serviceChanges)
+	serviceUpdateResult := proxier.svcPortMap.Update(proxier.serviceChanges)
 	endpointUpdateResult := proxier.endpointsMap.Update(proxier.endpointsChanges)
 
 	staleServices := serviceUpdateResult.UDPStaleClusterIP
 	// merge stale services gathered from updateEndpointsMap
 	for _, svcPortName := range endpointUpdateResult.StaleServiceNames {
-		if svcInfo, ok := proxier.serviceMap[svcPortName]; ok && svcInfo != nil && conntrack.IsClearConntrackNeeded(svcInfo.Protocol()) {
+		if svcInfo, ok := proxier.svcPortMap[svcPortName]; ok && svcInfo != nil && conntrack.IsClearConntrackNeeded(svcInfo.Protocol()) {
 			klog.V(2).InfoS("Stale service", "protocol", strings.ToLower(string(svcInfo.Protocol())), "servicePortName", svcPortName, "clusterIP", svcInfo.ClusterIP())
 			staleServices.Insert(svcInfo.ClusterIP().String())
 			for _, extIP := range svcInfo.ExternalIPStrings() {
@@ -1107,7 +1104,7 @@ func (proxier *Proxier) syncProxyRules() {
 	}
 
 	hasNodePort := false
-	for _, svc := range proxier.serviceMap {
+	for _, svc := range proxier.svcPortMap {
 		svcInfo, ok := svc.(*servicePortInfo)
 		if ok && svcInfo.NodePort() != 0 {
 			hasNodePort = true
@@ -1159,7 +1156,7 @@ func (proxier *Proxier) syncProxyRules() {
 	nodeIPs = nodeIPs[:idx]
 
 	// Build IPVS rules for each service.
-	for svcPortName, svcPort := range proxier.serviceMap {
+	for svcPortName, svcPort := range proxier.svcPortMap {
 		svcInfo, ok := svcPort.(*servicePortInfo)
 		if !ok {
 			klog.ErrorS(nil, "Failed to cast serviceInfo", "servicePortName", svcPortName)
@@ -1239,7 +1236,7 @@ func (proxier *Proxier) syncProxyRules() {
 			// ExternalTrafficPolicy only works for NodePort and external LB traffic, does not affect ClusterIP
 			// So we still need clusterIP rules in onlyNodeLocalEndpoints mode.
 			internalNodeLocal := false
-			if utilfeature.DefaultFeatureGate.Enabled(features.ServiceInternalTrafficPolicy) && svcInfo.InternalPolicyLocal() {
+			if svcInfo.InternalPolicyLocal() {
 				internalNodeLocal = true
 			}
 			if err := proxier.syncEndpoint(svcPortName, internalNodeLocal, serv); err != nil {
@@ -1577,14 +1574,14 @@ func (proxier *Proxier) syncProxyRules() {
 	proxier.iptablesData.Write(proxier.filterChains.Bytes())
 	proxier.iptablesData.Write(proxier.filterRules.Bytes())
 
-	klog.V(5).InfoS("Restoring iptables", "rules", string(proxier.iptablesData.Bytes()))
+	klog.V(5).InfoS("Restoring iptables", "rules", proxier.iptablesData.Bytes())
 	err = proxier.iptables.RestoreAll(proxier.iptablesData.Bytes(), utiliptables.NoFlushTables, utiliptables.RestoreCounters)
 	if err != nil {
 		if pErr, ok := err.(utiliptables.ParseError); ok {
 			lines := utiliptables.ExtractLines(proxier.iptablesData.Bytes(), pErr.Line(), 3)
 			klog.ErrorS(pErr, "Failed to execute iptables-restore", "rules", lines)
 		} else {
-			klog.ErrorS(err, "Failed to execute iptables-restore", "rules", string(proxier.iptablesData.Bytes()))
+			klog.ErrorS(err, "Failed to execute iptables-restore", "rules", proxier.iptablesData.Bytes())
 		}
 		metrics.IptablesRestoreFailuresTotal.Inc()
 		return
@@ -1913,7 +1910,7 @@ func (proxier *Proxier) createAndLinkKubeChain() {
 // This assumes the proxier mutex is held
 func (proxier *Proxier) deleteEndpointConnections(connectionMap []proxy.ServiceEndpoint) {
 	for _, epSvcPair := range connectionMap {
-		if svcInfo, ok := proxier.serviceMap[epSvcPair.ServicePortName]; ok && conntrack.IsClearConntrackNeeded(svcInfo.Protocol()) {
+		if svcInfo, ok := proxier.svcPortMap[epSvcPair.ServicePortName]; ok && conntrack.IsClearConntrackNeeded(svcInfo.Protocol()) {
 			endpointIP := utilproxy.IPPart(epSvcPair.Endpoint)
 			svcProto := svcInfo.Protocol()
 			err := conntrack.ClearEntriesForNAT(proxier.exec, svcInfo.ClusterIP().String(), endpointIP, svcProto)
@@ -2003,7 +2000,7 @@ func (proxier *Proxier) syncEndpoint(svcPortName proxy.ServicePortName, onlyNode
 	// filter endpoints if appropriate feature gates are enabled and the
 	// Service does not have conflicting configuration such as
 	// externalTrafficPolicy=Local.
-	svcInfo, ok := proxier.serviceMap[svcPortName]
+	svcInfo, ok := proxier.svcPortMap[svcPortName]
 	if !ok {
 		klog.InfoS("Unable to filter endpoints due to missing service info", "servicePortName", svcPortName)
 	} else {
@@ -2018,7 +2015,7 @@ func (proxier *Proxier) syncEndpoint(svcPortName proxy.ServicePortName, onlyNode
 				// will have the POD address and will be discarded.
 				endpoints = clusterEndpoints
 
-				if hasAnyEndpoints && svcInfo.InternalPolicyLocal() && utilfeature.DefaultFeatureGate.Enabled(features.ServiceInternalTrafficPolicy) {
+				if hasAnyEndpoints && svcInfo.InternalPolicyLocal() {
 					proxier.serviceNoLocalEndpointsInternal.Insert(svcPortName.NamespacedName.String())
 				}
 
